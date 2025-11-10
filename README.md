@@ -47,3 +47,5 @@ Health
 
 Others
 
+
+jira link: https://abarruffo95.atlassian.net/jira/software/projects/SCRUM/boards/1?jql=assignee%20%3D%20712020%3A4654214d-f630-461c-894f-b3911cdc6354&selectedIssue=SCRUM-5
