@@ -13,11 +13,17 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 @Entity
 @Table(name = "expense", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "category_id"}))
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Expense {
 
     @Id
@@ -26,7 +32,6 @@ public class Expense {
 
     @Column(name = "price", nullable = false)
     @NonNull
-    @NotBlank( message = "price cannot be blank")
     private BigDecimal price;
 
     @ManyToOne(optional = false)
