@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RestController
@@ -35,7 +36,10 @@ public class CategoryController {
     public ResponseEntity<List<Category>> getAll() {
         return new ResponseEntity<>(categoryService.getAll() , HttpStatus.OK);
     }
-    
-    
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+        return new ResponseEntity<>(categoryService.getById(id), HttpStatus.OK);
+    }
 
 }

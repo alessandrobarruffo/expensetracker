@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
 @RequiredArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class User {
@@ -35,7 +37,7 @@ public class User {
     private String username;
 
     @Column(name = "password", nullable = false)
-    @NotBlank(message = "username cannot be blank")
+    @NotBlank(message = "password cannot be blank")
     @NonNull
     private String password;
 
