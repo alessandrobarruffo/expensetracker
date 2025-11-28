@@ -1,11 +1,14 @@
 package com.abar.expensetracker.service;
 
+import java.util.List;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.abar.expensetracker.dto.request.CreateExpenseRequest;
+import com.abar.expensetracker.dto.request.ExpenseDto;
 import com.abar.expensetracker.entity.Expense;
 import com.abar.expensetracker.repository.ExpenseRepository;
+import com.abar.expensetracker.repository.ExpenseSpecifications;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -20,7 +23,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     private UserService userService;
 
     @Override
-    public void save(CreateExpenseRequest expenseDto) {
+    public void save(ExpenseDto expenseDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Expense expense = new Expense();
         expense.setPrice(expenseDto.getPrice());
@@ -28,5 +31,13 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setUser(userService.findByUsername(username));
         expenseRepository.save(expense);
     }
+
+    @Override
+    public List<Expense> getAllByUsername() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        return expenseRepository.findAll(ExpenseSpecifications.hasUsername(username));
+    }
+
+
 
 }

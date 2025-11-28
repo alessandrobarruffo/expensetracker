@@ -1,7 +1,11 @@
 package com.abar.expensetracker.service;
 
-import com.abar.expensetracker.dto.request.CreateExpenseRequest;
+import java.util.List;
+
+import com.abar.expensetracker.dto.request.ExpenseDto;
+import com.abar.expensetracker.entity.Expense;
 
 public interface ExpenseService {
-    public void save(CreateExpenseRequest expense);
+    public void save(ExpenseDto expense);
+    public List<Expense> getAllByUsername();
 }
