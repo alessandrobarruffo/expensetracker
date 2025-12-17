@@ -1,6 +1,7 @@
 package com.abar.expensetracker.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +33,10 @@ public class Expense {
     @Column(name = "price", nullable = false)
     @NonNull
     private BigDecimal price;
+
+    @Column(name = "date", nullable = false)
+    @NonNull
+    private LocalDateTime date;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", referencedColumnName = "id")

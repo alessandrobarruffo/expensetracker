@@ -1,9 +1,11 @@
 package com.abar.expensetracker.dto.request;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import com.abar.expensetracker.validation.OnCreate;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +24,10 @@ public class ExpenseDto {
     @NonNull
     @NotNull(groups = OnCreate.class)
     private Long category;
+
+    @Nonnull
+    @NotNull(groups = OnCreate.class)
+    private LocalDateTime date;
     
 
 }

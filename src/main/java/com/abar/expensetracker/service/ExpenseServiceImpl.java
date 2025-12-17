@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.abar.expensetracker.dto.request.ExpenseDto;
+import com.abar.expensetracker.dto.request.ExpenseFilter;
 import com.abar.expensetracker.entity.Expense;
 import com.abar.expensetracker.repository.ExpenseRepository;
 import com.abar.expensetracker.repository.ExpenseSpecifications;
@@ -29,13 +30,14 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setPrice(expenseDto.getPrice());
         expense.setCategory(categoryService.getById(expenseDto.getCategory()));
         expense.setUser(userService.findByUsername(username));
+        expense.setDate(expenseDto.getDate());
         expenseRepository.save(expense);
     }
 
     @Override
-    public List<Expense> getAllByUsername() {
+    public List<Expense> getAll(ExpenseFilter filter) {
         String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return expenseRepository.findAll(ExpenseSpecifications.hasUsername(username));
+        return expenseRepository.findAll(ExpenseSpecifications.hasUsername(username).and(ExpenseSpecifications.filter(filter)));
     }
 
 
