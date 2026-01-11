@@ -1,9 +1,11 @@
 package com.abar.expensetracker.dto.request;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.abar.expensetracker.validation.OnCreate;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +29,9 @@ public class ExpenseDto {
 
     @Nonnull
     @NotNull(groups = OnCreate.class)
-    private LocalDateTime date;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonProperty("expense_date")
+    private LocalDate expenseDate;
     
 
 }

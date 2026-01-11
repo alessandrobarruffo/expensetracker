@@ -1,7 +1,7 @@
 package com.abar.expensetracker.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,13 +30,13 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false, precision = 19, scale = 2)
     @NonNull
     private BigDecimal price;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "expense_date", nullable = false)
     @NonNull
-    private LocalDateTime date;
+    private LocalDate expenseDate;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", referencedColumnName = "id")

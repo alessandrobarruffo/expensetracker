@@ -39,7 +39,7 @@ public class ExpenseController {
     @GetMapping("all")
     public ResponseEntity<List<ExpenseDto>> getExpenses(ExpenseFilter filter) {
         List<Expense> expenses = expenseService.getAll(filter);
-        List<ExpenseDto> expensesDto = expenses.stream().map((expense) -> new ExpenseDto(expense.getPrice(), expense.getId(), expense.getDate())).collect(Collectors.toList());
+        List<ExpenseDto> expensesDto = expenses.stream().map((expense) -> new ExpenseDto(expense.getPrice(), expense.getId(), expense.getExpenseDate())).collect(Collectors.toList());
         return new ResponseEntity<List<ExpenseDto>>(expensesDto, HttpStatus.OK);
     }
     

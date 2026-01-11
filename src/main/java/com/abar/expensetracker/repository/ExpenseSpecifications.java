@@ -39,11 +39,11 @@ public class ExpenseSpecifications {
             }
 
             if (filter.getFrom() != null) {
-                preds.add(builder.greaterThan(root.get("date"), filter.getFrom()));
+                preds.add(builder.greaterThanOrEqualTo(root.get("expenseDate"), filter.getFrom()));
             }
 
             if (filter.getTo() != null) {
-                preds.add(builder.lessThanOrEqualTo(root.get("date"), filter.getTo()));
+                preds.add(builder.lessThanOrEqualTo(root.get("expenseDate"), filter.getTo()));
             }
 
             return builder.and(preds.toArray(new Predicate[0]));
