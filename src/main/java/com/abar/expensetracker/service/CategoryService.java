@@ -11,7 +11,7 @@ public interface CategoryService {
 
     List<Category> getAll();
 
-    PageDto<Category> getAll(Integer page, Integer size);
+    PageDto<Category> getAll(Pageable pageable);
 
     void save(Category category);
 

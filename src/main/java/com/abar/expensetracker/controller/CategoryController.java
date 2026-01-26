@@ -1,7 +1,6 @@
 package com.abar.expensetracker.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.abar.expensetracker.dto.request.PageDto;
@@ -13,8 +12,6 @@ import lombok.AllArgsConstructor;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +39,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<Category>> getCategories(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) {
-        return new ResponseEntity<>(categoryService.getAll(page, size), HttpStatus.OK);
+    public ResponseEntity<PageDto<Category>> getCategories(Pageable pageable) {
+        return new ResponseEntity<>(categoryService.getAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

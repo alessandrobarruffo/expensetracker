@@ -29,16 +29,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public PageDto<Category> getAll(Integer page, Integer size) {
-        if (page == null && size == null) {
-            List<Category> content = categoryRepository.findAll();
-            PageDto<Category> dto = new PageDto<Category>(content, content.size());
-            return dto;
-        }
-
-        List<Category> content = categoryRepository.findAll(PageRequest.of(page, size)).getContent();
-        PageDto<Category> dto = new PageDto<Category>(content, categoryRepository.findAll().size());
-        return dto;
+    public PageDto<Category> getAll(@NonNull Pageable pageable) {
+        Page<Category> page = categoryRepository.findAll(pageable);
+        return new PageDto<>(page.getContent(), page.getTotalElements());
     }
 
     @Override

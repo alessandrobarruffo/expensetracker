@@ -16,6 +16,6 @@ public class PageDto<T> {
     private List<T> content;
 
     @JsonProperty("total_count")
-    private Integer totalCount;
+    private Long totalCount;
 
 }
