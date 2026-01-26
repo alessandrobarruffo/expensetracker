@@ -1,7 +1,7 @@
 package com.abar.expensetracker.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +13,7 @@ import com.abar.expensetracker.repository.ExpenseSpecifications;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
 @Service
 @AllArgsConstructor
@@ -35,11 +36,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<Expense> getAll(ExpenseFilter filter) {
+    public Page<Expense> getAll(ExpenseFilter filter, @NonNull Pageable pageable) {
         String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return expenseRepository.findAll(ExpenseSpecifications.hasUsername(username).and(ExpenseSpecifications.filter(filter)));
+        return expenseRepository
+                .findAll(ExpenseSpecifications.hasUsername(username).and(ExpenseSpecifications.filter(filter)),
+                        pageable);
     }
-
-
 
 }

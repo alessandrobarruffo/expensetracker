@@ -1,6 +1,7 @@
 package com.abar.expensetracker.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.abar.expensetracker.dto.request.ExpenseDto;
 import com.abar.expensetracker.dto.request.ExpenseFilter;
@@ -8,5 +9,6 @@ import com.abar.expensetracker.entity.Expense;
 
 public interface ExpenseService {
     public void save(ExpenseDto expense);
-    public List<Expense> getAll(ExpenseFilter filter);
+
+    public Page<Expense> getAll(ExpenseFilter filter, Pageable pageables);
 }
