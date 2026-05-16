@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequestMapping("/user")
 @AllArgsConstructor
@@ -23,10 +22,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<HttpStatus> postMethodName(@Valid @RequestBody User user) {
+    public ResponseEntity<HttpStatus> registerUser(@Valid @RequestBody User user) {
         userService.register(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-    
 
 }
