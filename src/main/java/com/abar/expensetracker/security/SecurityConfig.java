@@ -17,6 +17,7 @@ import com.abar.expensetracker.security.filter.AuthenticationFilter;
 import com.abar.expensetracker.security.filter.ExceptionHandlerFilter;
 import com.abar.expensetracker.security.filter.JWTAuthorizationFilter;
 import com.abar.expensetracker.security.manager.CustomAuthenticationManager;
+import com.abar.expensetracker.service.RefreshTokenService;
 
 import lombok.AllArgsConstructor;
 
@@ -26,10 +27,11 @@ public class SecurityConfig {
 
     private final CustomAuthenticationManager authenticationManager;
     private final ExceptionUtils exceptionUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, exceptionUtils);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, exceptionUtils, refreshTokenService);
         authenticationFilter.setFilterProcessesUrl("/user/authenticate");
         http
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
@@ -37,7 +39,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests.requestMatchers("/h2/**").permitAll()
                         .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/swagger-ui.html",
+                                "/swagger-resources/**", "/webjars/**")
+                        .permitAll()
                         .anyRequest().authenticated()
 
                 ).addFilterBefore(new ExceptionHandlerFilter(exceptionUtils), AuthenticationFilter.class)
@@ -55,11 +60,22 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Refresh-Token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(
+            "/swagger-ui/**", 
+            "/v3/api-docs/**", 
+            "/v3/api-docs",
+            "/swagger-resources/**", 
+            "/swagger-ui.html", 
+            "/webjars/**");
     }
 
 }

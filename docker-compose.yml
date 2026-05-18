@@ -1,0 +1,32 @@
+version: '3.3'
+services:
+  db:
+    image: mysql/mysql-server:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'expense-db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - my-db:/var/lib/mysql
+
+  app:
+    build: .
+    restart: always
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # Override the DB host to point to the 'db' container instead of 'localhost'
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/expense-db?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_FLYWAY_URL=jdbc:mysql://db:3306/expense-db?useSSL=false&allowPublicKeyRetrieval=true
+
+volumes:
+  my-db:

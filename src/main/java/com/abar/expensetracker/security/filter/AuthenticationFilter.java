@@ -12,6 +12,7 @@ import com.abar.expensetracker.entity.User;
 import com.abar.expensetracker.exception.ExceptionUtils;
 import com.abar.expensetracker.security.SecurityConstants;
 import com.abar.expensetracker.security.manager.CustomAuthenticationManager;
+import com.abar.expensetracker.service.RefreshTokenService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private CustomAuthenticationManager authenticationManager;
     private final ExceptionUtils exceptionUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -54,6 +56,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             Authentication authResult) throws IOException, ServletException {
             String token = JWT.create().withSubject(authResult.getPrincipal().toString()).withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION)).sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
             response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
+            
+            String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
+            response.setHeader("Refresh-Token", refreshToken);
     }
 
 }
