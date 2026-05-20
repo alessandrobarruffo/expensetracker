@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -37,28 +38,34 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
             Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(),
                     user.getPassword());
-           return authenticationManager.authenticate(authentication);
+            return authenticationManager.authenticate(authentication);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-                exceptionUtils.sendErrorResponse(response, failed, HttpServletResponse.SC_UNAUTHORIZED);
+        exceptionUtils.sendErrorResponse(response, failed, HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
-            String token = JWT.create().withSubject(authResult.getPrincipal().toString()).withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION)).sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
-            response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
-            
-            String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
-            response.setHeader("Refresh-Token", refreshToken);
+        String token = JWT.create().withSubject(authResult.getPrincipal().toString())
+                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
+                .sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
+        response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
+
+        String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
+        Cookie cookie = new Cookie("Refresh-Token", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(cookie);
     }
 
 }

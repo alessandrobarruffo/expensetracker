@@ -47,6 +47,31 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return rawToken;
     }
 
+    @Override
+    public User verifyRefreshTokenAndGetUser(String rawToken) {
+        String tokenHash = hashToken(rawToken);
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new RuntimeException("Refresh token non valido"));
+
+        if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(refreshToken);
+            throw new RuntimeException("Refresh token scaduto. Effettua nuovamente il login.");
+        }
+
+        if (refreshToken.isRevoked()) {
+            throw new RuntimeException("Refresh token revocato.");
+        }
+
+        return refreshToken.getUser();
+    }
+
+    @Override
+    public void deleteRefreshToken(String rawToken) {
+        String tokenHash = hashToken(rawToken);
+        refreshTokenRepository.findByTokenHash(tokenHash)
+                .ifPresent(refreshTokenRepository::delete);
+    }
+
     private String hashToken(String rawToken) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
