@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -35,6 +36,9 @@ public class UserController {
 
     private UserService userService;
     private RefreshTokenService refreshTokenService;
+
+    @Value("${jwt.secret}")
+    private final String secretKey;
 
     @Operation(summary = "Register a new user", description = "Registers a new user in the system. The password will be encrypted.")
     @ApiResponse(responseCode = "201", description = "User successfully registered")
@@ -60,7 +64,7 @@ public class UserController {
             // Genera il nuovo Access Token
             String token = JWT.create().withSubject(username)
                     .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
-                    .sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
+                    .sign(Algorithm.HMAC512(secretKey));
 
             // Genera il nuovo Refresh Token
             String newRefreshToken = refreshTokenService.createRefreshToken(username);
