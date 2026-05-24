@@ -3,7 +3,6 @@ package com.abar.expensetracker.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.abar.expensetracker.dto.response.RefreshTokenResponse;
 import com.abar.expensetracker.entity.User;
 import com.abar.expensetracker.security.SecurityConstants;
 import com.abar.expensetracker.service.RefreshTokenService;
@@ -48,17 +47,14 @@ public class UserController {
     @Operation(summary = "Refresh token")
     @ApiResponse(responseCode = "201", description = "Token refreshed successfully")
     @PostMapping("/refresh")
-    public ResponseEntity<RefreshTokenResponse> refreshToken(
-            @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<HttpStatus> refreshToken(
+            @CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response) {
         try {
             // Verifica il refresh token e ottieni l'utente
             User user = refreshTokenService.verifyRefreshTokenAndGetUser(refreshToken);
             String username = user.getUsername();
 
-            // Opzionale: puoi eliminare il vecchio refresh token (rotazione del token)
+            // eliminazione del vecchio refresh token (rotazione del token)
             refreshTokenService.deleteRefreshToken(refreshToken);
 
             // Genera il nuovo Access Token
@@ -72,7 +68,7 @@ public class UserController {
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24 * 7);
+            cookie.setMaxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION);
             response.addCookie(cookie);
             response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
             return new ResponseEntity<>(HttpStatus.OK);

@@ -30,6 +30,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private CustomAuthenticationManager authenticationManager;
     private final ExceptionUtils exceptionUtils;
     private final RefreshTokenService refreshTokenService;
+    private final String secretKey;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -56,7 +57,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             Authentication authResult) throws IOException, ServletException {
         String token = JWT.create().withSubject(authResult.getPrincipal().toString())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
-                .sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
+                .sign(Algorithm.HMAC512(secretKey));
         response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
 
         String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());

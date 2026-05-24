@@ -16,8 +16,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
+    private final String secretKey;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -25,7 +29,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader(SecurityConstants.AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith(SecurityConstants.BEARER)) {
             String token = authorizationHeader.replace(SecurityConstants.BEARER, "");
-           String username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET_KEY)).build().verify(token).getSubject();
+           String username = JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token).getSubject();
            Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, Arrays.asList());
            SecurityContextHolder.getContext().setAuthentication(authentication);
         }

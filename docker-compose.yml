@@ -24,6 +24,7 @@ services:
       - db
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SECURITY_SECRET_KEY=${SECURITY_SECRET_KEY}
       # Override the DB host to point to the 'db' container instead of 'localhost'
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/expense-db?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_FLYWAY_URL=jdbc:mysql://db:3306/expense-db?useSSL=false&allowPublicKeyRetrieval=true

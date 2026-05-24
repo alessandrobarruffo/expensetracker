@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,19 +20,24 @@ import com.abar.expensetracker.security.filter.JWTAuthorizationFilter;
 import com.abar.expensetracker.security.manager.CustomAuthenticationManager;
 import com.abar.expensetracker.service.RefreshTokenService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomAuthenticationManager authenticationManager;
     private final ExceptionUtils exceptionUtils;
     private final RefreshTokenService refreshTokenService;
 
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, exceptionUtils, refreshTokenService);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, exceptionUtils,
+                refreshTokenService, jwtSecret);
         authenticationFilter.setFilterProcessesUrl("/user/authenticate");
         http
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
@@ -47,7 +53,7 @@ public class SecurityConfig {
 
                 ).addFilterBefore(new ExceptionHandlerFilter(exceptionUtils), AuthenticationFilter.class)
                 .addFilter(authenticationFilter)
-                .addFilterAfter(new JWTAuthorizationFilter(), AuthenticationFilter.class)
+                .addFilterAfter(new JWTAuthorizationFilter(jwtSecret), AuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
@@ -68,14 +74,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer webSecurityCustomizer() {
+    public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(
-            "/swagger-ui/**", 
-            "/v3/api-docs/**", 
-            "/v3/api-docs",
-            "/swagger-resources/**", 
-            "/swagger-ui.html", 
-            "/webjars/**");
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/v3/api-docs",
+                "/swagger-resources/**",
+                "/swagger-ui.html",
+                "/webjars/**");
     }
 
 }
