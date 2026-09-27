@@ -1,5 +1,13 @@
 package com.abar.expensetracker.controller;
 
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,35 +18,26 @@ import com.abar.expensetracker.service.UserService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "User API", description = "Endpoints for managing users and authentication")
 @RestController
-@RequestMapping("/user")
-@AllArgsConstructor
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private UserService userService;
     private RefreshTokenService refreshTokenService;
 
     @Value("${jwt.secret}")
-    private final String secretKey;
+    private String secretKey;
 
     @Operation(summary = "Register a new user", description = "Registers a new user in the system. The password will be encrypted.")
     @ApiResponse(responseCode = "201", description = "User successfully registered")
@@ -52,7 +51,14 @@ public class UserController {
     @ApiResponse(responseCode = "201", description = "Token refreshed successfully")
     @PostMapping("/refresh")
     public ResponseEntity<HttpStatus> refreshToken(
-            @CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response) {
+            @CookieValue(name = "Refresh-Token", required = false) String refreshTokenHeader,
+            @CookieValue(name = "refreshToken", required = false) String refreshTokenAlt,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        String refreshToken = refreshTokenHeader != null ? refreshTokenHeader : refreshTokenAlt;
+        if (refreshToken == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         try {
             // Verifica il refresh token e ottieni l'utente
             User user = refreshTokenService.verifyRefreshTokenAndGetUser(refreshToken);
@@ -70,7 +76,7 @@ public class UserController {
             String newRefreshToken = refreshTokenService.createRefreshToken(username);
             Cookie cookie = new Cookie("Refresh-Token", newRefreshToken);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setSecure(request.isSecure());
             cookie.setPath("/");
             cookie.setMaxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION);
             response.addCookie(cookie);

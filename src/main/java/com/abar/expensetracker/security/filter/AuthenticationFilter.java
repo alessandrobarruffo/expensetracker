@@ -63,7 +63,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
         Cookie cookie = new Cookie("Refresh-Token", refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(request.isSecure());
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60 * 24 * 7);
         response.addCookie(cookie);

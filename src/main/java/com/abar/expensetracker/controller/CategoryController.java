@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Category API", description = "Endpoints for managing expense categories")
 @RestController
-@RequestMapping(path = "/category")
+@RequestMapping(path = "/api/category")
 @AllArgsConstructor
 public class CategoryController {
 

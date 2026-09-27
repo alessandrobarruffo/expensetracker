@@ -29,7 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Expense API", description = "Endpoints for managing user expenses")
 @RestController
-@RequestMapping(path = "/expense")
+@RequestMapping(path = "/api/expense")
 @AllArgsConstructor
 public class ExpenseController {
 
