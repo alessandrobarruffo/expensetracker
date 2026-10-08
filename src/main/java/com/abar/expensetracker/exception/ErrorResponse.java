@@ -1,11 +1,7 @@
 package com.abar.expensetracker.exception;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,8 +11,12 @@ import lombok.Setter;
 @Setter
 public class ErrorResponse {
 
+    private String code;
+    private String requestId;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
-    private List<String> messages;
+    private String message;
+
+
 
 }

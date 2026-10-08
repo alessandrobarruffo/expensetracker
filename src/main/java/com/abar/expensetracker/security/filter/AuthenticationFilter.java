@@ -1,8 +1,11 @@
 package com.abar.expensetracker.security.filter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Date;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -61,12 +64,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
 
         String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
-        Cookie cookie = new Cookie("Refresh-Token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(request.isSecure());
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 7);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("Refresh-Token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/api/user/refresh")
+                .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
 }

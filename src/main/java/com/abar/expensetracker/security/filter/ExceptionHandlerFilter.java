@@ -1,6 +1,8 @@
 package com.abar.expensetracker.security.filter;
 
 import java.io.IOException;
+import java.util.UUID;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,7 +31,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         } catch (BadCredentialsException e) {
              exceptionUtils.sendErrorResponse(response, e, HttpServletResponse.SC_UNAUTHORIZED);
         }  catch (RuntimeException e) {
-            exceptionUtils.sendErrorResponse(response, e, HttpServletResponse.SC_BAD_REQUEST);
+            exceptionUtils.sendUnexpectedErrorResponse(response, e);
         }
     }
 

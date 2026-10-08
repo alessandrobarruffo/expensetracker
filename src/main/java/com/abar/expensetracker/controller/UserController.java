@@ -3,7 +3,10 @@ package com.abar.expensetracker.controller;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,8 +36,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-    private UserService userService;
-    private RefreshTokenService refreshTokenService;
+    private final UserService userService;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -47,15 +50,22 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    /*
+    @Operation(summary = "Logout")
+    @ApiResponse(responseCode = "200", description = "Logout successfully")
+    @PostMapping("/logout")
+    public ResponseEntity<HttpStatus> logout(
+            @CookieValue(name = "Refresh-Token", required = false) String refreshToken
+    ) {
+
+    }*/
+
     @Operation(summary = "Refresh token")
     @ApiResponse(responseCode = "201", description = "Token refreshed successfully")
     @PostMapping("/refresh")
     public ResponseEntity<HttpStatus> refreshToken(
-            @CookieValue(name = "Refresh-Token", required = false) String refreshTokenHeader,
-            @CookieValue(name = "refreshToken", required = false) String refreshTokenAlt,
-            HttpServletRequest request,
+            @CookieValue(name = "Refresh-Token", required = false) String refreshToken,
             HttpServletResponse response) {
-        String refreshToken = refreshTokenHeader != null ? refreshTokenHeader : refreshTokenAlt;
         if (refreshToken == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -74,12 +84,15 @@ public class UserController {
 
             // Genera il nuovo Refresh Token
             String newRefreshToken = refreshTokenService.createRefreshToken(username);
-            Cookie cookie = new Cookie("Refresh-Token", newRefreshToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(request.isSecure());
-            cookie.setPath("/");
-            cookie.setMaxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION);
-            response.addCookie(cookie);
+
+            ResponseCookie cookie = ResponseCookie.from("Refresh-Token", newRefreshToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("Strict")
+                    .path("/api/user/refresh")
+                    .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
             response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (RuntimeException e) {

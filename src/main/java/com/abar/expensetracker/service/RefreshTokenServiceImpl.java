@@ -4,8 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.abar.expensetracker.entity.RefreshTokenStatus;
 import org.springframework.stereotype.Service;
 
 import com.abar.expensetracker.entity.RefreshToken;
@@ -37,7 +40,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken.setTokenHash(tokenHash);
         refreshToken.setCreatedAt(Instant.now());
         refreshToken.setExpiresAt(Instant.now().plusMillis(SecurityConstants.REFRESH_TOKEN_EXPIRATION * 1000));
-        refreshToken.setRevoked(false);
 
         refreshTokenRepository.save(refreshToken);
 
@@ -56,9 +58,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new RuntimeException("Refresh token scaduto. Effettua nuovamente il login.");
         }
 
-        if (refreshToken.isRevoked()) {
+        if (refreshToken.getStatus().equals(RefreshTokenStatus.REVOKED)) {
             throw new RuntimeException("Refresh token revocato.");
         }
+
+        if (refreshToken.getStatus().equals(RefreshTokenStatus.USED)) {
+            List<RefreshToken> refreshTokens = refreshTokenRepository.findByUser(refreshToken.getUser());
+            refreshTokens.forEach(t -> t.setStatus(RefreshTokenStatus.REVOKED));
+            refreshTokenRepository.saveAll(refreshTokens);
+            throw new RuntimeException("Refresh token già usato.");
+        }
+
+        refreshToken.setStatus(RefreshTokenStatus.USED);
+        refreshTokenRepository.save(refreshToken);
 
         return refreshToken.getUser();
     }
@@ -68,6 +80,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         String tokenHash = hashToken(rawToken);
         refreshTokenRepository.findByTokenHash(tokenHash)
                 .ifPresent(refreshTokenRepository::delete);
+    }
+
+    @Override
+    public void revokeRefreshToken(String rawToken) {
+        String tokenHash = hashToken(rawToken);
+        refreshTokenRepository.findByTokenHash(tokenHash).ifPresent(token -> {
+            token.setStatus(RefreshTokenStatus.REVOKED);
+        });
     }
 
     private String hashToken(String rawToken) {
