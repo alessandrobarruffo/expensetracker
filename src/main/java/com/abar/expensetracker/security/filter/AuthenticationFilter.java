@@ -1,7 +1,6 @@
 package com.abar.expensetracker.security.filter;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Date;
 
 import org.springframework.http.HttpHeaders;
@@ -22,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -68,7 +66,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
-                .path("/api/user/refresh")
+                .path("/api/user/authenticate")
                 .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

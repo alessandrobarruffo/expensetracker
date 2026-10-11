@@ -3,7 +3,6 @@ package com.abar.expensetracker.controller;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -24,8 +23,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,19 +47,32 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    /*
+
     @Operation(summary = "Logout")
     @ApiResponse(responseCode = "200", description = "Logout successfully")
-    @PostMapping("/logout")
+    @PostMapping("/authenticate/logout")
     public ResponseEntity<HttpStatus> logout(
-            @CookieValue(name = "Refresh-Token", required = false) String refreshToken
+            @CookieValue(name = "Refresh-Token", required = false) String refreshToken,
+            HttpServletResponse response
     ) {
-
-    }*/
+        if (refreshToken == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        refreshTokenService.revokeRefreshToken(refreshToken);
+        ResponseCookie cookie = ResponseCookie.from("Refresh-Token", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/api/user/authenticate")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @Operation(summary = "Refresh token")
     @ApiResponse(responseCode = "201", description = "Token refreshed successfully")
-    @PostMapping("/refresh")
+    @PostMapping("authenticate/refresh")
     public ResponseEntity<HttpStatus> refreshToken(
             @CookieValue(name = "Refresh-Token", required = false) String refreshToken,
             HttpServletResponse response) {
@@ -73,9 +83,6 @@ public class UserController {
             // Verifica il refresh token e ottieni l'utente
             User user = refreshTokenService.verifyRefreshTokenAndGetUser(refreshToken);
             String username = user.getUsername();
-
-            // eliminazione del vecchio refresh token (rotazione del token)
-            refreshTokenService.deleteRefreshToken(refreshToken);
 
             // Genera il nuovo Access Token
             String token = JWT.create().withSubject(username)
@@ -89,7 +96,7 @@ public class UserController {
                     .httpOnly(true)
                     .secure(true)
                     .sameSite("Strict")
-                    .path("/api/user/refresh")
+                    .path("/api/user/authenticate")
                     .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
