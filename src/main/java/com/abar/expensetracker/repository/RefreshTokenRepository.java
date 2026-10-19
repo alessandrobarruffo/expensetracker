@@ -13,5 +13,4 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByTokenHash(String tokenHash);
     List<RefreshToken> findByUser(User user);
     @Transactional void deleteByExpiresAtBefore(Instant now);
-    // TODO: add index to tokenHash column
 }
