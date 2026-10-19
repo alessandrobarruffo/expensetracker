@@ -4,10 +4,10 @@ services:
     image: mysql/mysql-server:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: 'expense-db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DATABASE: ${DB_NAME:-expense-db}
+      MYSQL_USER: ${DB_USER:-user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
     ports:
       - '3306:3306'
     expose:
