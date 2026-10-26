@@ -1,5 +1,6 @@
 package com.abar.expensetracker.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,7 +48,7 @@ public class ExpenseController {
     @Operation(summary = "Get expenses", description = "Retrieves a paginated list of expenses with optional filtering.")
     @ApiResponse(responseCode = "200", description = "Paginated list of expenses retrieved successfully")
     @GetMapping()
-    public ResponseEntity<PageDto<ExpenseDto>> getExpenses(ExpenseFilter filter, Pageable pageable) {
+    public ResponseEntity<PageDto<ExpenseDto>> getExpenses(@ParameterObject ExpenseFilter filter, @ParameterObject Pageable pageable) {
         Page<Expense> expenses = expenseService.getAll(filter, pageable);
         List<ExpenseDto> expensesDto = expenses.stream()
                 .map((expense) -> new ExpenseDto(expense.getPrice(), expense.getId(), expense.getExpenseDate()))
