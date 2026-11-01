@@ -28,10 +28,10 @@ public class ExpenseServiceImpl implements ExpenseService {
     public void save(ExpenseDto expenseDto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Expense expense = new Expense();
-        expense.setPrice(expenseDto.getPrice());
-        expense.setCategory(categoryService.getById(expenseDto.getCategory()));
+        expense.setPrice(expenseDto.price());
+        expense.setCategory(categoryService.getById(expenseDto.category()));
         expense.setUser(userService.findByUsername(username));
-        expense.setExpenseDate(expenseDto.getExpenseDate());
+        expense.setExpenseDate(expenseDto.expenseDate());
         expenseRepository.save(expense);
     }
 

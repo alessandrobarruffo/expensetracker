@@ -33,17 +33,17 @@ public class ExpenseSpecifications {
         return (root, query, builder) -> {
             List<Predicate> preds = new ArrayList<>();
 
-            if (filter.getCategoryName() != null) {
+            if (filter.categoryName() != null) {
                 Join<Expense, Category> categoryJoin = root.join("category");
-                preds.add(builder.equal(categoryJoin.get("name"), filter.getCategoryName()));
+                preds.add(builder.equal(categoryJoin.get("name"), filter.categoryName()));
             }
 
-            if (filter.getFrom() != null) {
-                preds.add(builder.greaterThanOrEqualTo(root.get("expenseDate"), filter.getFrom()));
+            if (filter.from() != null) {
+                preds.add(builder.greaterThanOrEqualTo(root.get("expenseDate"), filter.from()));
             }
 
-            if (filter.getTo() != null) {
-                preds.add(builder.lessThanOrEqualTo(root.get("expenseDate"), filter.getTo()));
+            if (filter.to() != null) {
+                preds.add(builder.lessThanOrEqualTo(root.get("expenseDate"), filter.to()));
             }
 
             return builder.and(preds.toArray(new Predicate[0]));
