@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
   ENTITY_NOT_FOUND("ERR_404_NOT_FOUND", HttpStatus.NOT_FOUND, "Resource not found"),
   USERNAME_TAKEN("ERR_499_USERNAME_TAKEN", HttpStatus.CONFLICT, "Username already taken"),
+  INVALID_CREDENTIALS("ERR_401_INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED, "Wrong credentials"),
   DATA_INTEGRITY_VIOLATION(
       "ERR_500_DATA_INTEGRITY", HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving data"),
   INVALID_PROPERTY_REFERENCE(

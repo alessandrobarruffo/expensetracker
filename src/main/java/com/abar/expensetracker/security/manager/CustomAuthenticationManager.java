@@ -1,7 +1,9 @@
 package com.abar.expensetracker.security.manager;
 
 import com.abar.expensetracker.entity.User;
+import com.abar.expensetracker.exception.EntityNotFoundException;
 import com.abar.expensetracker.service.UserService;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,11 +22,15 @@ public class CustomAuthenticationManager implements AuthenticationManager {
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
-    User user = userService.findByUsername(authentication.getPrincipal().toString());
+    User user;
+    try {
+      user = userService.findByUsername(authentication.getPrincipal().toString());
+    } catch (EntityNotFoundException e) {
+      throw new BadCredentialsException("Wrong credentials");
+    }
     if (bCryptPasswordEncoder.matches(
         authentication.getCredentials().toString(), user.getPassword())) {
-      return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+      return new UsernamePasswordAuthenticationToken(user.getUsername(), null, List.of());
     } else {
       throw new BadCredentialsException("Wrong credentials");
     }

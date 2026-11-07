@@ -23,7 +23,11 @@ public class ExceptionUtils {
     response.setContentType("application/json");
     response.setStatus(statusCode);
     ErrorResponse errorResponse =
-        new ErrorResponse(statusCode + "", null, LocalDateTime.now(), e.getMessage());
+        new ErrorResponse(
+            ErrorCode.INVALID_CREDENTIALS.getCode(),
+            null,
+            LocalDateTime.now(),
+            ErrorCode.INVALID_CREDENTIALS.getDefaultMessage());
     response.getWriter().write(mapper.writeValueAsString(errorResponse));
     response.getWriter().flush();
   }
