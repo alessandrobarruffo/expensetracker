@@ -1,8 +1,5 @@
 package com.abar.expensetracker.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,31 +18,32 @@ import lombok.NonNull;
 import lombok.Setter;
 
 @Entity
-@Table(name = "expense", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "category_id"}))
+@Table(
+    name = "expense",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "category_id"}))
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class Expense {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "price", nullable = false, precision = 19, scale = 2)
-    @NonNull
-    private BigDecimal price;
+  @Column(name = "price", nullable = false, precision = 19, scale = 2)
+  @NonNull
+  private BigDecimal price;
 
-    @Column(name = "expense_date", nullable = false)
-    @NonNull
-    private LocalDate expenseDate;
+  @Column(name = "expense_date", nullable = false)
+  @NonNull
+  private LocalDate expenseDate;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private Category category;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "category_id", referencedColumnName = "id")
+  private Category category;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user; 
-    
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 }

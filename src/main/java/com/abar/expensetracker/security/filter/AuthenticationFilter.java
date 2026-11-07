@@ -1,19 +1,6 @@
 package com.abar.expensetracker.security.filter;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-
 import com.abar.expensetracker.dto.response.UserResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import com.abar.expensetracker.entity.User;
 import com.abar.expensetracker.exception.ExceptionUtils;
 import com.abar.expensetracker.security.SecurityConstants;
@@ -22,62 +9,81 @@ import com.abar.expensetracker.service.RefreshTokenService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Date;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @AllArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private CustomAuthenticationManager authenticationManager;
-    private final ExceptionUtils exceptionUtils;
-    private final RefreshTokenService refreshTokenService;
-    private final String secretKey;
-    private static final ObjectMapper mapper = new ObjectMapper();
+  private CustomAuthenticationManager authenticationManager;
+  private final ExceptionUtils exceptionUtils;
+  private final RefreshTokenService refreshTokenService;
+  private final String secretKey;
+  private static final ObjectMapper mapper = new ObjectMapper();
 
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException {
-        try {
-            User user = mapper.readValue(request.getInputStream(), User.class);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(),
-                    user.getPassword());
-            return authenticationManager.authenticate(authentication);
+  @Override
+  public Authentication attemptAuthentication(
+      HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    try {
+      User user = mapper.readValue(request.getInputStream(), User.class);
+      Authentication authentication =
+          new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+      return authenticationManager.authenticate(authentication);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    } catch (IOException e) {
+      throw new RuntimeException(e.getMessage());
     }
+  }
 
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException failed) throws IOException, ServletException {
-        exceptionUtils.sendErrorResponse(response, failed, HttpServletResponse.SC_UNAUTHORIZED);
-    }
+  @Override
+  protected void unsuccessfulAuthentication(
+      HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
+      throws IOException, ServletException {
+    exceptionUtils.sendErrorResponse(response, failed, HttpServletResponse.SC_UNAUTHORIZED);
+  }
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            Authentication authResult) throws IOException, ServletException {
-        String token = JWT.create().withSubject(authResult.getPrincipal().toString())
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
-                .sign(Algorithm.HMAC512(secretKey));
-        response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
+  @Override
+  protected void successfulAuthentication(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain,
+      Authentication authResult)
+      throws IOException, ServletException {
+    String token =
+        JWT.create()
+            .withSubject(authResult.getPrincipal().toString())
+            .withExpiresAt(
+                new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
+            .sign(Algorithm.HMAC512(secretKey));
+    response.setHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
 
-        String refreshToken = refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
-        ResponseCookie cookie = ResponseCookie.from("Refresh-Token", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/api/user/authenticate")
-                .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    String refreshToken =
+        refreshTokenService.createRefreshToken(authResult.getPrincipal().toString());
+    ResponseCookie cookie =
+        ResponseCookie.from("Refresh-Token", refreshToken)
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/api/user/authenticate")
+            .maxAge(SecurityConstants.REFRESH_TOKEN_EXPIRATION)
+            .build();
+    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getOutputStream().write(mapper.writeValueAsBytes(new UserResponse(authResult.getName())));
-    }
-
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response
+        .getOutputStream()
+        .write(mapper.writeValueAsBytes(new UserResponse(authResult.getName())));
+  }
 }

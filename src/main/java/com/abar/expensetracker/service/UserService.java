@@ -4,7 +4,7 @@ import com.abar.expensetracker.entity.User;
 
 public interface UserService {
 
-    public void register(User user);
-    public User findByUsername(String username);
+  void register(User user);
 
+  User findByUsername(String username);
 }

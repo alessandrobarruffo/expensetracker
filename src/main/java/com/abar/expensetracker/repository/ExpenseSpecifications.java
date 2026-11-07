@@ -1,55 +1,47 @@
 package com.abar.expensetracker.repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale.Category;
-
-import org.springframework.data.jpa.domain.Specification;
-
 import com.abar.expensetracker.dto.request.ExpenseFilter;
 import com.abar.expensetracker.entity.Expense;
 import com.abar.expensetracker.entity.User;
-
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale.Category;
+import org.springframework.data.jpa.domain.Specification;
 
 public class ExpenseSpecifications {
 
-    public static Specification<Expense> hasUsername(String username) {
+  public static Specification<Expense> hasUsername(String username) {
 
-        return (root, query, builder) -> {
-            if (username == null) {
-                return builder.conjunction();
-            }
-            Join<Expense, User> userJoin = root.join("user");
-            return builder.equal(userJoin.get("username"), username);
+    return (root, query, builder) -> {
+      if (username == null) {
+        return builder.conjunction();
+      }
+      Join<Expense, User> userJoin = root.join("user");
+      return builder.equal(userJoin.get("username"), username);
+    };
+  }
 
-        };
+  public static Specification<Expense> filter(ExpenseFilter filter) {
 
-    }
+    return (root, query, builder) -> {
+      List<Predicate> preds = new ArrayList<>();
 
-    public static Specification<Expense> filter(ExpenseFilter filter) {
+      if (filter.categoryName() != null) {
+        Join<Expense, Category> categoryJoin = root.join("category");
+        preds.add(builder.equal(categoryJoin.get("name"), filter.categoryName()));
+      }
 
-        return (root, query, builder) -> {
-            List<Predicate> preds = new ArrayList<>();
+      if (filter.from() != null) {
+        preds.add(builder.greaterThanOrEqualTo(root.get("expenseDate"), filter.from()));
+      }
 
-            if (filter.categoryName() != null) {
-                Join<Expense, Category> categoryJoin = root.join("category");
-                preds.add(builder.equal(categoryJoin.get("name"), filter.categoryName()));
-            }
+      if (filter.to() != null) {
+        preds.add(builder.lessThanOrEqualTo(root.get("expenseDate"), filter.to()));
+      }
 
-            if (filter.from() != null) {
-                preds.add(builder.greaterThanOrEqualTo(root.get("expenseDate"), filter.from()));
-            }
-
-            if (filter.to() != null) {
-                preds.add(builder.lessThanOrEqualTo(root.get("expenseDate"), filter.to()));
-            }
-
-            return builder.and(preds.toArray(new Predicate[0]));
-
-        };
-
-    }
-
+      return builder.and(preds.toArray(new Predicate[0]));
+    };
+  }
 }

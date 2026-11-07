@@ -1,5 +1,3 @@
 package com.abar.expensetracker.validation;
 
-public interface OnUpdate {
-
-}
+public interface OnUpdate {}
