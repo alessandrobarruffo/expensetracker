@@ -1,0 +1,28 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/expense-db?useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  # Flyway properties
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    schemas: expense-db
+    locations: classpath:db/migration/expense-db
+
+# JWT Configuration
+jwt:
+  secret: ${SECURITY_SECRET_KEY}
+

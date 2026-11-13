@@ -1,0 +1,38 @@
+server:
+  port: ${PORT:8080}
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:19032019}
+    key-store-type: PKCS12
+    key-alias: springboot
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/expense-db}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${JPA_SHOW_SQL:false}
+
+  # Flyway properties
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    schemas: expense-db
+    locations: classpath:db/migration/expense-db
+
+# CORS Configuration
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+
+# JWT Configuration
+jwt:
+  secret: ${SECURITY_SECRET_KEY}
+
