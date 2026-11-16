@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/expense-db}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/expensedb}
     username: ${DB_USER:user}
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,7 +19,7 @@ spring:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
-    schemas: expense-db
+    schemas: ${DB_NAME:expensedb}
     locations: classpath:db/migration/expense-db
 
 # CORS Configuration
