@@ -42,6 +42,6 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.ACR_LOGIN_SERVER }}/expense-tracker:dev
-            ${{ secrets.ACR_LOGIN_SERVER }}/expense-tracker:dev-${{ github.sha }}
+            ${{ secrets.ACR_LOGIN_SERVER }}/expensetracker:dev
+            ${{ secrets.ACR_LOGIN_SERVER }}/expensetracker:dev-${{ github.sha }}
 
