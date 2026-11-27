@@ -19,7 +19,7 @@ spring:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
-    schemas: ${DB_NAME:expensedb}
+    schemas: ${DB_NAME}
     locations: classpath:db/migration/expense-db
 
 # JWT Configuration
